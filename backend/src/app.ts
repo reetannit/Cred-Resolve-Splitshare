@@ -24,26 +24,17 @@ const app: Application = express();
 // Connect to MongoDB
 connectDB();
 
-// Middleware
+// Middleware - CORS
 app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [
-            'http://localhost:5173',
-            'http://localhost:5174',
-            'http://localhost:5175',
-            'https://frontend-kappa-fawn-12.vercel.app',
-            'https://cred-resolve-splitshare.vercel.app',
-            process.env.FRONTEND_URL,
-        ].filter(Boolean);
-        // Allow requests with no origin (like mobile apps or curl) or Vercel preview URLs
-        if (!origin || allowedOrigins.includes(origin) || origin?.endsWith('.vercel.app')) {
-            callback(null, true);
-        } else {
-            callback(null, true); // Allow all origins for now
-        }
-    },
+    origin: true, // Allow all origins
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+
+// Handle preflight requests explicitly
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
