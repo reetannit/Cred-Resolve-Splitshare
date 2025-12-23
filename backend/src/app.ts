@@ -92,6 +92,16 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customSiteTitle: 'Expense Sharing API Docs',
 }));
 
+// Root route
+app.get('/', (_req: Request, res: Response) => {
+    res.json({
+        success: true,
+        message: 'Hello from backend! 🚀',
+        version: '1.0.0',
+        docs: '/api-docs',
+    });
+});
+
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {
     res.json({
