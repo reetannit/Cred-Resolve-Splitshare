@@ -31,13 +31,15 @@ app.use(cors({
             'http://localhost:5173',
             'http://localhost:5174',
             'http://localhost:5175',
+            'https://frontend-kappa-fawn-12.vercel.app',
+            'https://cred-resolve-splitshare.vercel.app',
             process.env.FRONTEND_URL,
         ].filter(Boolean);
-        // Allow requests with no origin (like mobile apps or curl)
-        if (!origin || allowedOrigins.includes(origin)) {
+        // Allow requests with no origin (like mobile apps or curl) or Vercel preview URLs
+        if (!origin || allowedOrigins.includes(origin) || origin?.endsWith('.vercel.app')) {
             callback(null, true);
         } else {
-            callback(null, true); // Allow all in development
+            callback(null, true); // Allow all origins for now
         }
     },
     credentials: true,
