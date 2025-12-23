@@ -170,3 +170,132 @@ export const getSuggestions = async (
         next(error);
     }
 };
+
+/**
+ * Confirm a settlement (by the creditor/receiver)
+ * PATCH /api/settlements/:id/confirm
+ */
+export const confirmSettlement = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const userId = req.user!._id;
+
+        const settlement = await Settlement.findById(id);
+        if (!settlement) {
+            throw new AppError('Settlement not found', 404);
+        }
+
+        // Only the receiver (creditor) can confirm
+        if (!settlement.toUser.equals(userId)) {
+            throw new AppError('Only the receiver can confirm this settlement', 403);
+        }
+
+        // Check if already processed
+        if (settlement.status !== 'PENDING') {
+            throw new AppError(`Settlement already ${settlement.status.toLowerCase()}`, 400);
+        }
+
+        // Confirm the settlement
+        settlement.status = 'CONFIRMED' as any;
+        settlement.confirmedAt = new Date();
+        await settlement.save();
+
+        await settlement.populate('fromUser', 'name email');
+        await settlement.populate('toUser', 'name email');
+        if (settlement.group) {
+            await settlement.populate('group', 'name');
+        }
+
+        res.json({
+            success: true,
+            message: 'Settlement confirmed successfully',
+            data: settlement,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Reject a settlement (by the creditor/receiver)
+ * PATCH /api/settlements/:id/reject
+ */
+export const rejectSettlement = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const userId = req.user!._id;
+
+        const settlement = await Settlement.findById(id);
+        if (!settlement) {
+            throw new AppError('Settlement not found', 404);
+        }
+
+        // Only the receiver (creditor) can reject
+        if (!settlement.toUser.equals(userId)) {
+            throw new AppError('Only the receiver can reject this settlement', 403);
+        }
+
+        // Check if already processed
+        if (settlement.status !== 'PENDING') {
+            throw new AppError(`Settlement already ${settlement.status.toLowerCase()}`, 400);
+        }
+
+        // Reject the settlement
+        settlement.status = 'REJECTED' as any;
+        await settlement.save();
+
+        await settlement.populate('fromUser', 'name email');
+        await settlement.populate('toUser', 'name email');
+        if (settlement.group) {
+            await settlement.populate('group', 'name');
+        }
+
+        res.json({
+            success: true,
+            message: 'Settlement rejected',
+            data: settlement,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get pending settlements requiring user confirmation
+ * GET /api/settlements/pending
+ */
+export const getPendingSettlements = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const userId = req.user!._id;
+
+        // Get settlements where user is the receiver and status is pending
+        const settlements = await Settlement.find({
+            toUser: userId,
+            status: 'PENDING',
+        })
+            .populate('fromUser', 'name email')
+            .populate('toUser', 'name email')
+            .populate('group', 'name')
+            .sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            count: settlements.length,
+            data: settlements,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

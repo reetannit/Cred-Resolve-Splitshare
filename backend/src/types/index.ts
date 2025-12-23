@@ -14,6 +14,12 @@ export enum TransactionType {
     SETTLEMENT = 'SETTLEMENT'
 }
 
+export enum SettlementStatus {
+    PENDING = 'PENDING',
+    CONFIRMED = 'CONFIRMED',
+    REJECTED = 'REJECTED'
+}
+
 // ============ User Types ============
 export interface IUser {
     name: string;
@@ -93,6 +99,8 @@ export interface ISettlement {
     amount: number;
     group?: Types.ObjectId;
     note?: string;
+    status: SettlementStatus;
+    confirmedAt?: Date;
     createdAt: Date;
 }
 

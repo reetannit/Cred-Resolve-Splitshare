@@ -127,6 +127,21 @@ export const settlementService = {
         return response.data;
     },
 
+    getPending: async (): Promise<Settlement[]> => {
+        const response = await api.get<ApiResponse<Settlement[]> & { data: Settlement[] }>('/settlements/pending');
+        return response.data.data;
+    },
+
+    confirm: async (id: string): Promise<Settlement> => {
+        const response = await api.patch<ApiResponse<Settlement>>(`/settlements/${id}/confirm`);
+        return response.data.data!;
+    },
+
+    reject: async (id: string): Promise<Settlement> => {
+        const response = await api.patch<ApiResponse<Settlement>>(`/settlements/${id}/reject`);
+        return response.data.data!;
+    },
+
     getSuggestions: async (groupId: string): Promise<{ optimizedSettlements: SettlementSuggestion[] }> => {
         const response = await api.get<ApiResponse<{ optimizedSettlements: SettlementSuggestion[] }>>('/settlements/suggestions', {
             params: { groupId },
@@ -134,3 +149,4 @@ export const settlementService = {
         return response.data.data!;
     },
 };
+

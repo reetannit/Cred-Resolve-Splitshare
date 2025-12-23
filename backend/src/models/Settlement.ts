@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { ISettlementDocument } from '../types';
+import { ISettlementDocument, SettlementStatus } from '../types';
 
 const settlementSchema = new Schema<ISettlementDocument>(
     {
@@ -26,6 +26,14 @@ const settlementSchema = new Schema<ISettlementDocument>(
             type: String,
             trim: true,
             maxlength: [200, 'Note cannot exceed 200 characters'],
+        },
+        status: {
+            type: String,
+            enum: Object.values(SettlementStatus),
+            default: SettlementStatus.PENDING,
+        },
+        confirmedAt: {
+            type: Date,
         },
     },
     {

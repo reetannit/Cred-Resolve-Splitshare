@@ -44,6 +44,14 @@ export interface Expense {
     updatedAt: string;
 }
 
+export const SettlementStatus = {
+    PENDING: 'PENDING',
+    CONFIRMED: 'CONFIRMED',
+    REJECTED: 'REJECTED',
+} as const;
+
+export type SettlementStatus = typeof SettlementStatus[keyof typeof SettlementStatus];
+
 export interface Settlement {
     _id: string;
     fromUser: User;
@@ -51,6 +59,8 @@ export interface Settlement {
     amount: number;
     group?: Group;
     note?: string;
+    status: SettlementStatus;
+    confirmedAt?: string;
     createdAt: string;
 }
 

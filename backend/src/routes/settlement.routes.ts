@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import { createSettlement, getSettlements, getSuggestions } from '../controllers';
+import {
+    createSettlement,
+    getSettlements,
+    getSuggestions,
+    confirmSettlement,
+    rejectSettlement,
+    getPendingSettlements
+} from '../controllers';
 import { authenticate, settlementValidation, handleValidation } from '../middleware';
 
 const router = Router();
@@ -11,7 +18,7 @@ router.use(authenticate);
  * @swagger
  * /api/settlements:
  *   post:
- *     summary: Record a settlement payment
+ *     summary: Record a settlement payment (requires creditor confirmation)
  *     tags: [Settlements]
  *     security:
  *       - bearerAuth: []
@@ -35,7 +42,7 @@ router.use(authenticate);
  *                 type: string
  *     responses:
  *       201:
- *         description: Settlement recorded
+ *         description: Settlement recorded (pending confirmation)
  */
 router.post('/', settlementValidation.create, handleValidation, createSettlement);
 
@@ -69,6 +76,20 @@ router.get('/', getSettlements);
 
 /**
  * @swagger
+ * /api/settlements/pending:
+ *   get:
+ *     summary: Get pending settlements requiring your confirmation
+ *     tags: [Settlements]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of pending settlements
+ */
+router.get('/pending', getPendingSettlements);
+
+/**
+ * @swagger
  * /api/settlements/suggestions:
  *   get:
  *     summary: Get optimized settlement suggestions
@@ -88,4 +109,51 @@ router.get('/', getSettlements);
  */
 router.get('/suggestions', getSuggestions);
 
+/**
+ * @swagger
+ * /api/settlements/{id}/confirm:
+ *   patch:
+ *     summary: Confirm a settlement (creditor only)
+ *     tags: [Settlements]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Settlement ID
+ *     responses:
+ *       200:
+ *         description: Settlement confirmed
+ *       403:
+ *         description: Only the receiver can confirm
+ */
+router.patch('/:id/confirm', confirmSettlement);
+
+/**
+ * @swagger
+ * /api/settlements/{id}/reject:
+ *   patch:
+ *     summary: Reject a settlement (creditor only)
+ *     tags: [Settlements]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Settlement ID
+ *     responses:
+ *       200:
+ *         description: Settlement rejected
+ *       403:
+ *         description: Only the receiver can reject
+ */
+router.patch('/:id/reject', rejectSettlement);
+
 export default router;
+
