@@ -113,16 +113,21 @@ app.use('/api/settlements', settlementRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-// Start server
+// Start server only if not running on Vercel
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`
+// Only start the server if we're not in a serverless environment
+if (process.env.VERCEL !== '1') {
+    app.listen(PORT, () => {
+        console.log(`
 🚀 Server is running!
 📍 Local: http://localhost:${PORT}
 📚 API Docs: http://localhost:${PORT}/api-docs
 🏥 Health: http://localhost:${PORT}/health
-  `);
-});
+    `);
+    });
+}
 
+// Export for Vercel serverless
 export default app;
+module.exports = app;
