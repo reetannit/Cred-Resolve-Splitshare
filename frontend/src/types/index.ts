@@ -1,10 +1,12 @@
 // Type definitions for the frontend
 
-export enum SplitType {
-    EQUAL = 'EQUAL',
-    EXACT = 'EXACT',
-    PERCENTAGE = 'PERCENTAGE',
-}
+export const SplitType = {
+    EQUAL: 'EQUAL',
+    EXACT: 'EXACT',
+    PERCENTAGE: 'PERCENTAGE',
+} as const;
+
+export type SplitType = typeof SplitType[keyof typeof SplitType];
 
 export interface User {
     _id: string;
